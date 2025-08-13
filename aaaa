@@ -1,0 +1,42 @@
+import express from "express";
+import fetch from "node-fetch";
+
+const app = express();
+app.use(express.json());
+
+// 🔑 Твой ключ OpenRouter
+const API_KEY = "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";
+
+// 📡 URL OpenRouter
+const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+// Прокси-эндпоинт
+app.post("/v1/chat/completions", async (req, res) => {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error("Proxy error:", error);
+    res.status(500).json({ error: "Proxy failed" });
+  }
+});
+
+// Проверка, что сервер работает
+app.get("/", (req, res) => {
+  res.send("Proxy is running");
+});
+
+// Запуск сервера
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Proxy server running on port ${PORT}`);
+});
